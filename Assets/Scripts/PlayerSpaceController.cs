@@ -8,6 +8,9 @@ public class PlayerSpaceController : MonoBehaviour {
 	public Transform centerEyeAnchor; // a link to the center eye anchor
 	public Transform leftEyeAnchor; // a link to the left eye anchor
 	public Transform playerSpaceSuit; // a link to the space suit.
+	public GameObject explosion; // for detonator prefab
+
+	private Object myExp; 
 
 	bool useWithNoController = true;
 
@@ -152,6 +155,12 @@ public class PlayerSpaceController : MonoBehaviour {
 			leftArmExtended = true;
 		}
 		// TODO: left arm implementation....
+		if( Input.GetButton("Explode")) {
+			if(closestObjectWithinReach != null && closestObjectWithinReach.transform != null) {
+				myExp = Instantiate(explosion, closestObjectWithinReach.transform.position,
+				            Quaternion.identity);
+			}
+		}
 	}
 
 	void OnTriggerEnter(Collider other) {
