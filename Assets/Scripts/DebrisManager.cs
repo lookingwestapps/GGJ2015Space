@@ -16,7 +16,7 @@ public class DebrisManager : MonoBehaviour {
 
 		// at start instantiate a bunch of objects
 		for (int i = 0; i < numberOfDebrisOnScreen; i++) {
-			CreateDebris();
+			CreateInitialDebris();
 		}
 	}
 
@@ -60,7 +60,7 @@ public class DebrisManager : MonoBehaviour {
 		return debris;
 	}
 
-	void CreateDebris() {
+	void CreateInitialDebris() {
 		Transform debris = NextDebris ();
 
 		// start debris spinning
@@ -78,5 +78,11 @@ public class DebrisManager : MonoBehaviour {
 
 		// random position
 		debris.transform.position = (Random.onUnitSphere * generateDistance) + playerObject.position;
+	}
+
+	public void RemoveDebris(Transform debris) {
+		allDebris.Remove (debris);
+		// create another object
+		CreateDebrisOnEdge();
 	}
 }
