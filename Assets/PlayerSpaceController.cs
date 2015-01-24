@@ -5,6 +5,7 @@ public class PlayerSpaceController : MonoBehaviour {
 
 	public float movementSpeed = 4.0f;
 	public Transform centerEyeAnchor; // a link to the center eye anchor
+	public Transform leftEyeAnchor; // a link to the left eye anchor
 	public Transform playerSpaceSuit; // a link to the space suit.
 
 	private List<GameObject> debrisWithinReach;
@@ -73,7 +74,7 @@ public class PlayerSpaceController : MonoBehaviour {
 		float minDistance = 9999999f;
 		GameObject closestObjectWithinReach = null;
 		foreach (GameObject debris in debrisWithinReach) {
-			Vector2 posOnScreen = Camera.main.WorldToScreenPoint(debris.transform.position);
+			Vector2 posOnScreen = leftEyeAnchor.camera.WorldToScreenPoint(debris.transform.position);
 			float dist = Vector2.Distance(posOnScreen, new Vector2(Screen.width * 0.5f, Screen.height * 0.5f));
 			if (dist < minDistance) {
 				// this object is closer to the center of the screen
@@ -83,7 +84,8 @@ public class PlayerSpaceController : MonoBehaviour {
 		}
 		if (closestObjectWithinReach != null) {
 			// place "GRAB" text on this object
-			grabText.position = closestObjectWithinReach.transform.position;
+			grabText.position = Vector3.Lerp(transform.position, closestObjectWithinReach.transform.position, 0.3f);
+			grabText.rotation = transform.rotation;
 			grabText.gameObject.SetActive(true);
 		} else {
 			// remove the "GRAB" text
@@ -112,6 +114,7 @@ public class PlayerSpaceController : MonoBehaviour {
 			// tell the debris manager to remove the object
 			debrisManager.RemoveDebris(closestObjectWithinReach.transform);
 
+			Debug.Log("right trigger released, grabbed:" + closestObjectWithinReach);
 			// TODO: show inventory icon
 		}
 
@@ -124,22 +127,22 @@ public class PlayerSpaceController : MonoBehaviour {
 		// TODO: left arm implementation....
 	}
 
-	void OnCollisionEnter(Collision collision) {
-//		Debug.Log ("Collision Enter! with:" + collision.gameObject.tag);
+	void OnTriggerEnter(Collider other) {
+//		Debug.Log ("Collision Enter! with:" + other.gameObject.tag);
 
 		// track all objects within reach
-		if (collision.gameObject.tag == "Debris") {
-			debrisWithinReach.Add(collision.gameObject);
+		if (other.gameObject.tag == "Debris") {
+			debrisWithinReach.Add(other.gameObject);
 
 		}
 	}
 
-	void OnCollisionExit(Collision collision) {
-//		Debug.Log ("collision EXIT! with:" + collision.gameObject.tag);
+	void OnTriggerExit(Collider other) {
+//		Debug.Log ("collision EXIT! with:" + other.gameObject.tag);
 
 		// track all objects leaving reach
-		if (collision.gameObject.tag == "Debris") {
-			debrisWithinReach.Remove(collision.gameObject);
+		if (other.gameObject.tag == "Debris") {
+			debrisWithinReach.Remove(other.gameObject);
 		}
 	}
 }
