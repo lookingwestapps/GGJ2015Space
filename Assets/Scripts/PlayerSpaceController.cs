@@ -15,6 +15,7 @@ public class PlayerSpaceController : MonoBehaviour {
 	public HUDVisor hudVisor; // link
 
 	public TextMesh whatDoWeDoNowText; // a link to text mesh
+	public TextMesh whereDoWeGoNowText; // a link to text mesh 
 
 	private Object myExp; 
 
@@ -61,8 +62,12 @@ public class PlayerSpaceController : MonoBehaviour {
 
 		StartCoroutine ("ExplodeEarthAfterDelay");
 
+		// fade out texts and activate them
 		whatDoWeDoNowText.GetComponent<MeshRenderer>().material.color = new Color(Color.white.r, Color.white.g, Color.white.b, 0f);
 		whatDoWeDoNowText.gameObject.SetActive (true);
+
+		whereDoWeGoNowText.GetComponent<MeshRenderer>().material.color = new Color(Color.white.r, Color.white.g, Color.white.b, 0f);
+		whereDoWeGoNowText.gameObject.SetActive (true);
 
 		fadeToBlackSprite.GetComponent<SpriteRenderer>().material.color = new Color(Color.white.r, Color.white.g, Color.white.b, 0f);
 		fadeToBlackSprite.gameObject.SetActive (true);
@@ -104,6 +109,9 @@ public class PlayerSpaceController : MonoBehaviour {
 			innerTimer -= Time.deltaTime;
 			yield return 0;
 		}
+
+		// return to soft breathing
+		hudVisor.PlayBreathingSoft ();
 
 		// fade out "What do we do now" text
 		for (int i = 80; i >= 0; i--) {
@@ -159,6 +167,15 @@ public class PlayerSpaceController : MonoBehaviour {
 				fadeToBlackSprite.GetComponent<SpriteRenderer>().material.color = new Color(Color.white.r, Color.white.g, Color.white.b, alpha);
 				yield return 0;
 			}
+
+			// show the whereDoWeGoNowText  text
+			// fade in "Where do we go now" text
+			for (int i = 0; i < 120; i++) {
+				float alpha = (float)i / 120f;
+				whereDoWeGoNowText.GetComponent<MeshRenderer>().material.color = new Color(Color.white.r, Color.white.g, Color.white.b, alpha);
+				yield return 0;
+			}
+
 
 			// pause to watch
 			yield return new WaitForSeconds (10.0f);
@@ -340,13 +357,24 @@ public class PlayerSpaceController : MonoBehaviour {
 			// Check if it's time to spawn the "partner"
 			if ((partner == null) && (partnerSpawnTimer >= minimumTimeToSpawnPartner) && (objectsCollected.Count >= minObjectsBeforeSpawning)) {
 				RespawnPartner();
-			} else if ((partner != null) && (minimumTimeToSpawnPartner <= 0)) {
+			} else if ((partner != null) && (partnerSpawnTimer >= minimumTimeToSpawnPartner)) {
 				// parter already spawned, check if the player has turned and we need to respawn
 				float distFromPartner = Vector3.Distance(partner.position, transform.position);
-				if (distFromPartner > 83) {
+				if (distFromPartner > 83f) {
 					Debug.Log("re spawning parter");
 					RespawnPartner();
 				}
+			}
+		}
+
+		// == FAST BREATHING WHEN THE PARTNER IS IN VIEW ==
+		if (partner != null) {
+			Vector2 posOnScreen = leftEyeAnchor.camera.WorldToScreenPoint(partner.transform.position);
+			float dist = Vector2.Distance(posOnScreen, new Vector2(Screen.width * 0.5f, Screen.height * 0.5f));
+			if (dist < minDistance) {
+				// partner is right in front of us.
+				// play fast breathing
+				hudVisor.PlayBreathingFast();
 			}
 		}
 
@@ -369,7 +397,7 @@ public class PlayerSpaceController : MonoBehaviour {
 	void RespawnPartner() {
 		// spawn partner
 		if (partner != null) {
-			Destroy(partner);
+			Destroy(partner.gameObject);
 		}
 		partner = (Transform)Instantiate(partnerPrefab);
 		// position the partner right in front of the player in the distance
@@ -382,6 +410,9 @@ public class PlayerSpaceController : MonoBehaviour {
 		foreach (Transform child in earth.transform) {
 			child.rigidbody.AddForceAtPosition(Random.insideUnitSphere * 10000f, child.position);
 		}
+
+		// play fast breathing
+		hudVisor.PlayBreathingFast ();
 	}
 
 	void GrabObject(GameObject debris) {

@@ -14,7 +14,9 @@ public class HUDVisor : MonoBehaviour {
 	public Transform pizzaIcon;
 	public Transform carIcon;
 
-
+	public AudioClip breathingSlow;
+	public AudioClip breathingFast;
+	public AudioClip breathingHeavy;
 
 	// Use this for initialization
 	void Start () {
@@ -53,5 +55,18 @@ public class HUDVisor : MonoBehaviour {
 		} else {
 			Debug.Log("ERROR can't find icon!"); // shouldn't run
 		}
+	}
+
+	public void PlayBreathingFast() {
+		audio.clip = breathingFast;
+		audio.Play ();
+	}
+	public void PlayBreathingSoft() {
+		audio.clip = breathingSlow;
+		audio.Play ();
+	}
+	public void PlayBreathingHeavy() {
+		audio.clip = breathingHeavy;
+		audio.Play ();
 	}
 }
