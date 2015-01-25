@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
 
 public class PlayerSpaceController : MonoBehaviour {
@@ -10,17 +11,57 @@ public class PlayerSpaceController : MonoBehaviour {
 	public Transform playerSpaceSuit; // a link to the space suit.
 	public GameObject explosion; // for detonator prefab
 
+	public TextMesh whatDoWeDoNowText; // a link to text mesh
+
 	private Object myExp; 
 
 	public bool useWithNoController = true;
 
 	private List<GameObject> debrisWithinReach;
+	private bool earthHasExploded;
 //	private GameObject holdingLeftHand; // what each hand is currently holding or null
 //	private GameObject holdingRightHand;
 
 	// Use this for initialization
 	void Start () {
 		debrisWithinReach = new List<GameObject> ();
+
+		StartCoroutine ("ExplodeEarthAfterDelay");
+
+		whatDoWeDoNowText.GetComponent<MeshRenderer>().material.color = new Color(Color.white.r, Color.white.g, Color.white.b, 0f);
+		whatDoWeDoNowText.gameObject.SetActive (true);
+	}
+
+	IEnumerator ExplodeEarthAfterDelay() {
+		yield return new WaitForSeconds(8.0f);
+
+		BlowUpTheEarth();
+
+		yield return new WaitForSeconds(6.0f);
+
+		// fade in "What do we do now" text
+		for (int i = 0; i < 120; i++) {
+			float alpha = (float)i / 120f;
+			whatDoWeDoNowText.GetComponent<MeshRenderer>().material.color = new Color(Color.white.r, Color.white.g, Color.white.b, alpha);
+			yield return 0;
+		}
+
+		// TODO: throw big meteors by the player
+
+		// create debris cloud
+		debrisManager.CreateInitialDebris();
+
+		// set bool to allow player to turn
+		earthHasExploded = true;
+
+		yield return new WaitForSeconds(6.0f);
+
+		// fade out "What do we do now" text
+		for (int i = 80; i >= 0; i--) {
+			float alpha = (float)i / 80f;
+			whatDoWeDoNowText.GetComponent<MeshRenderer>().material.color = new Color(Color.white.r, Color.white.g, Color.white.b, alpha);
+			yield return 0;
+		}
 	}
 
 	public Vector2 leftStickSensitivity = new Vector2(2,2);
@@ -38,8 +79,11 @@ public class PlayerSpaceController : MonoBehaviour {
 	public DebrisManager debrisManager; // a link to the debris manager
 
 	private Transform partner; // this is the goal object that appears after playing a while
+	public Transform partnerPrefab;
 	public float minimumTimeToSpawnPartner = 60f;
 	private float partnerSpawnTimer = 0f;
+
+	public Transform earth; // link to the earth.
 
 
 	// Update is called once per frame
@@ -66,7 +110,9 @@ public class PlayerSpaceController : MonoBehaviour {
 			h = centerEyeAnchor.localRotation.y * turningByLookingSensitivity.y;
 		}
 
-		transform.Rotate(new Vector3(v, h, 0));
+		if (earthHasExploded == true) { // only allow rotation after the earth has exploded
+			transform.Rotate(new Vector3(v, h, 0));
+		}
 
 //		Debug.Log ("v:" + v + " h:" + h + " rotation distance:" + Vector2.SqrMagnitude(new Vector2(centerEyeAnchor.localRotation.x, centerEyeAnchor.localRotation.y)));
 		// slow and speed up based on turning if there is no controller input selected
@@ -88,8 +134,10 @@ public class PlayerSpaceController : MonoBehaviour {
 
 		                        
 		// ADD THRUST
-		if (Input.GetButton("Thrust")) {
-			movementSpeed += thrustSensitivity * Time.deltaTime;
+		if (earthHasExploded == true) { // only allow rotation after the earth has exploded
+			if (Input.GetButton("Thrust")) {
+				movementSpeed += thrustSensitivity * Time.deltaTime;
+			}
 		}
 
 		// move in the direction the player is looking
@@ -175,13 +223,17 @@ public class PlayerSpaceController : MonoBehaviour {
 		}
 		// Check if it's time to spawn the "partner"
 		if ((partner == null) && (minimumTimeToSpawnPartner <= 0)) {
-			// spawn partners
+			// spawn partner
+			partner = (Transform)Instantiate(partnerPrefab);
 		}
 
 
 		// == EXPLODE OBJECT ==
 		// when user presses button close to a debris
 		if( Input.GetButton("Explode")) {
+			BlowUpTheEarth();
+
+
 			/*
 			if(closestObjectWithinReach != null && closestObjectWithinReach.transform != null) {
 				myExp = Instantiate(explosion, closestObjectWithinReach.transform.position,
@@ -196,8 +248,16 @@ public class PlayerSpaceController : MonoBehaviour {
 
 			other.doExplode();
 			*/
-			Earth go = (Earth)GameObject.FindObjectOfType(typeof(Earth));
-			go.doExplode();
+//			Earth go = (Earth)GameObject.FindObjectOfType(typeof(Earth));
+//			go.doExplode();
+
+
+		}
+	}
+
+	void BlowUpTheEarth() {
+		foreach (Transform child in earth.transform) {
+			child.rigidbody.AddForceAtPosition(Random.insideUnitSphere * 10000f, child.position);
 		}
 	}
 

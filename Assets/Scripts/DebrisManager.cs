@@ -15,9 +15,9 @@ public class DebrisManager : MonoBehaviour {
 		allDebris = new List<Transform> ();
 
 		// at start instantiate a bunch of objects
-		for (int i = 0; i < numberOfDebrisOnScreen; i++) {
-			CreateInitialDebris();
-		}
+//		for (int i = 0; i < numberOfDebrisOnScreen; i++) {
+//			CreateInitialDebris();    // now triggered in PlayerSpaceController after earth explodes
+//		}
 	}
 
 	public Transform[] allDebrisPrefabs;
@@ -60,14 +60,16 @@ public class DebrisManager : MonoBehaviour {
 		return debris;
 	}
 
-	void CreateInitialDebris() {
-		Transform debris = NextDebris ();
+	public void CreateInitialDebris() {
+		for (int i = 0; i < numberOfDebrisOnScreen; i++) {
+			Transform debris = NextDebris ();
 
-		// start debris spinning
-		debris.rigidbody.AddTorque (Random.insideUnitSphere * 100);
-		
-		// random position
-		debris.transform.position = (Random.insideUnitSphere * generateDistance) + playerObject.position;
+			// start debris spinning
+			debris.rigidbody.AddTorque (Random.insideUnitSphere * 100);
+			
+			// random position
+			debris.transform.position = (Random.insideUnitSphere * generateDistance) + playerObject.position;
+		}
 	}
 
 	void CreateDebrisOnEdge() {
