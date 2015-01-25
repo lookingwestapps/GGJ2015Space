@@ -10,12 +10,16 @@ public class PlayerSpaceController : MonoBehaviour {
 	public Transform leftEyeAnchor; // a link to the left eye anchor
 	public Transform playerSpaceSuit; // a link to the space suit.
 	public GameObject explosion; // for detonator prefab
+	public Transform fadeToBlackSprite; // this is a black sprite place right in front of the eyes to fade the scene to black
+	public Transform handInHandWinner; // link to the hand in hand model that we show for the win condition
 
 	public TextMesh whatDoWeDoNowText; // a link to text mesh
 
 	private Object myExp; 
 
 	public bool useWithNoController = true;
+
+	private bool skipOpeningScene = false;
 
 	private List<GameObject> debrisWithinReach;
 	private bool earthHasExploded;
@@ -30,14 +34,25 @@ public class PlayerSpaceController : MonoBehaviour {
 
 		whatDoWeDoNowText.GetComponent<MeshRenderer>().material.color = new Color(Color.white.r, Color.white.g, Color.white.b, 0f);
 		whatDoWeDoNowText.gameObject.SetActive (true);
+
+		fadeToBlackSprite.GetComponent<SpriteRenderer>().material.color = new Color(Color.white.r, Color.white.g, Color.white.b, 0f);
+		fadeToBlackSprite.gameObject.SetActive (true);
 	}
 
 	IEnumerator ExplodeEarthAfterDelay() {
-		yield return new WaitForSeconds(8.0f);
+		float innerTimer = 8.0f; // wait for 8 seconds with the option to skip.
+		while ((innerTimer > 0) && (skipOpeningScene == false)) {
+			innerTimer -= Time.deltaTime;
+			yield return 0;
+		}
 
 		BlowUpTheEarth();
 
-		yield return new WaitForSeconds(6.0f);
+		innerTimer = 6.0f; // wait for 6 seconds with the option to skip.
+		while ((innerTimer > 0) && (skipOpeningScene == false)) {
+			innerTimer -= Time.deltaTime;
+			yield return 0;
+		}
 
 		// fade in "What do we do now" text
 		for (int i = 0; i < 120; i++) {
@@ -54,12 +69,57 @@ public class PlayerSpaceController : MonoBehaviour {
 		// set bool to allow player to turn
 		earthHasExploded = true;
 
-		yield return new WaitForSeconds(6.0f);
+		innerTimer = 6.0f; // wait for 6 seconds with the option to skip.
+		while ((innerTimer > 0) && (earthHasExploded == false)) {
+			innerTimer -= Time.deltaTime;
+			yield return 0;
+		}
 
 		// fade out "What do we do now" text
 		for (int i = 80; i >= 0; i--) {
 			float alpha = (float)i / 80f;
 			whatDoWeDoNowText.GetComponent<MeshRenderer>().material.color = new Color(Color.white.r, Color.white.g, Color.white.b, alpha);
+			yield return 0;
+		}
+	}
+	
+	IEnumerator PartnerFound() {
+		// HURRAY!
+		FadeOutScene ();
+
+		// load up the hand in hand model,
+
+		// start them moving forward
+
+		// match the camera motion, just a little bit slower so the model floats away
+
+		// fade in scene
+		FadeInScene ();
+
+		// pause to watch
+
+		// fade out for the last time
+
+		// load credits
+
+		// fade scene in
+		FadeInScene ();
+
+		yield return 0;
+	}
+	IEnumerator FadeInScene() {
+		// fade out black rect in front of eyes
+		for (int i = 80; i >= 0; i--) {
+			float alpha = (float)i / 80f;
+			fadeToBlackSprite.GetComponent<SpriteRenderer>().material.color = new Color(Color.white.r, Color.white.g, Color.white.b, alpha);
+			yield return 0;
+		}
+	}
+	IEnumerator FadeOutScene() {
+		// fade in black rect in front of eyes
+		for (int i = 0; i < 60; i++) {
+			float alpha = (float)i / 60;
+			fadeToBlackSprite.GetComponent<SpriteRenderer>().material.color = new Color(Color.white.r, Color.white.g, Color.white.b, alpha);
 			yield return 0;
 		}
 	}
@@ -206,7 +266,7 @@ public class PlayerSpaceController : MonoBehaviour {
 				float dist = Vector3.Distance(transform.position, debris.transform.position);
 				if (dist < 1.5f) {
 					// object is close enough to grab it. Grab it!
-					Debug.Log("AUTO GRABBING OBJECT!!:" + debris);
+//					Debug.Log("AUTO GRABBING OBJECT!!:" + debris);
 					debrisToGrab = debris;
 				}
 			}
@@ -217,42 +277,36 @@ public class PlayerSpaceController : MonoBehaviour {
 
 
 		// == GAME LOGIC TO SPAWN PARTNER ==
-		// Partner timer
-		if (partnerSpawnTimer > 0) {
-			partnerSpawnTimer -= Time.deltaTime;
-		}
-		// Check if it's time to spawn the "partner"
-		if ((partner == null) && (minimumTimeToSpawnPartner <= 0)) {
-			// spawn partner
-			partner = (Transform)Instantiate(partnerPrefab);
+		// Partner timer decrement, once player has control
+		if (earthHasExploded == true) {
+			if (partnerSpawnTimer < minimumTimeToSpawnPartner) {
+				partnerSpawnTimer += Time.deltaTime;
+			}
+			// Check if it's time to spawn the "partner"
+			if ((partner == null) && (partnerSpawnTimer >= minimumTimeToSpawnPartner)) {
+				// spawn partner
+				partner = (Transform)Instantiate(partnerPrefab);
+				// position the partner right in front of the player in the distance
+				partner.position = transform.position + (centerEyeAnchor.forward * 80);
+				partner.rotation = transform.rotation;
+//				Debug.Log("Spawning Partner!");
+			} else if ((partner != null) && (minimumTimeToSpawnPartner <= 0)) {
+				// parter already spawned, check if the player has turned and we need to respawn
+				// TODO:
+			}
 		}
 
 
+		// == SKIP OPENING INTRO SCENE == 
+		if (Input.GetButtonUp("DPadUp")) {
+			// when the dpad up is pressed, skip the opening scene
+			skipOpeningScene = true;
+		}
 		// == EXPLODE OBJECT ==
 		// when user presses button close to a debris
-		if( Input.GetButton("Explode")) {
-			BlowUpTheEarth();
-
-
-			/*
-			if(closestObjectWithinReach != null && closestObjectWithinReach.transform != null) {
-				myExp = Instantiate(explosion, closestObjectWithinReach.transform.position,
-				            Quaternion.identity);
-			}*/
-			/*
-			Debug.Log("In Explode...");
-			GameObject go = GameObject.Find("Earth");
-			Debug.Log("go is", go);
-			Earth other = (Earth) go.GetComponent(typeof(Earth));
-			Debug.Log("found ",other);
-
-			other.doExplode();
-			*/
-//			Earth go = (Earth)GameObject.FindObjectOfType(typeof(Earth));
-//			go.doExplode();
-
-
-		}
+//		if( Input.GetButtonUp("Explode")) {
+//			BlowUpTheEarth();
+//		}
 	}
 
 	void BlowUpTheEarth() {
@@ -277,14 +331,22 @@ public class PlayerSpaceController : MonoBehaviour {
 	}
 
 	void OnTriggerEnter(Collider other) {
-//		Debug.Log ("Collision Enter! with:" + other.gameObject.tag);
+		Debug.Log ("Trigger Enter! with:" + other.gameObject.tag);
 
 		// track all objects within reach
 		if (other.gameObject.tag == "Debris") {
 			debrisWithinReach.Add(other.gameObject);
+		} else if (other.gameObject.tag == "Partner") {
+			// REACHED GOAL OF FINDING PARTNER! GAME WIN!!
+			// fade out scene
+			StartCoroutine("PartnerFound");
 		}
+
 	}
 
+	void OnCollisionEnter(Collision collision) {
+		Debug.Log ("Collision Enter! with:" + collision.gameObject.tag);
+	}
 	void OnTriggerExit(Collider other) {
 //		Debug.Log ("collision EXIT! with:" + other.gameObject.tag);
 
