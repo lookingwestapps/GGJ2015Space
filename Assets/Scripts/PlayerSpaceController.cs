@@ -12,7 +12,7 @@ public class PlayerSpaceController : MonoBehaviour {
 
 	private Object myExp; 
 
-	bool useWithNoController = true;
+	public bool useWithNoController = true;
 
 	private List<GameObject> debrisWithinReach;
 //	private GameObject holdingLeftHand; // what each hand is currently holding or null
@@ -24,6 +24,7 @@ public class PlayerSpaceController : MonoBehaviour {
 	}
 
 	public Vector2 leftStickSensitivity = new Vector2(2,2);
+	public Vector2 turningByLookingSensitivity = new Vector2(2,2);
 	public bool invertYAxis = false;
 
 	public float thrustSensitivity = 1f;
@@ -35,6 +36,11 @@ public class PlayerSpaceController : MonoBehaviour {
 	private bool rightArmExtended;
 
 	public DebrisManager debrisManager; // a link to the debris manager
+
+	private Transform partner; // this is the goal object that appears after playing a while
+	public float minimumTimeToSpawnPartner = 60f;
+	private float partnerSpawnTimer = 0f;
+
 
 	// Update is called once per frame
 	void Update () {
@@ -56,20 +62,17 @@ public class PlayerSpaceController : MonoBehaviour {
 
 		// ROTATE  where we are looking. If there is no controller input
 		if ((h == 0) && (v == 0)) {
-			if (Mathf.Abs(centerEyeAnchor.localRotation.x) > 0.1f) {
-				v = centerEyeAnchor.localRotation.x;
-			}
-			if (Mathf.Abs(centerEyeAnchor.localRotation.y) > 0.1f) {
-				h = centerEyeAnchor.localRotation.y;
-			}
+			v = centerEyeAnchor.localRotation.x * turningByLookingSensitivity.x;
+			h = centerEyeAnchor.localRotation.y * turningByLookingSensitivity.y;
 		}
 
 		transform.Rotate(new Vector3(v, h, 0));
 
-		Debug.Log ("v:" + v + " h:" + h + " rotation distance:" + Vector2.SqrMagnitude(new Vector2(centerEyeAnchor.localRotation.x, centerEyeAnchor.localRotation.y)));
-		// slow down while turning if there is no controller input selected
+//		Debug.Log ("v:" + v + " h:" + h + " rotation distance:" + Vector2.SqrMagnitude(new Vector2(centerEyeAnchor.localRotation.x, centerEyeAnchor.localRotation.y)));
+		// slow and speed up based on turning if there is no controller input selected
 		if (useWithNoController == true) {
-			if ((h != 0) || (v != 0)) {
+			if ((Mathf.Abs(centerEyeAnchor.localRotation.x) > 0.1f) || (Mathf.Abs(centerEyeAnchor.localRotation.y) > 0.1f)) {
+				// slow down while turning if there is no controller input selected
 				movementSpeed -= thrustSensitivity * Time.deltaTime * 4f;
 				if (movementSpeed < speedWhileTurning) {
 					movementSpeed = speedWhileTurning;
@@ -136,25 +139,48 @@ public class PlayerSpaceController : MonoBehaviour {
 
 			if (closestObjectWithinReach != null) {
 				// now we have pulled the object in
-//				holdingRightHand = closestObjectWithinReach;
-
-				debrisWithinReach.Remove(closestObjectWithinReach);
-
-				// tell the debris manager to remove the object
-				debrisManager.RemoveDebris(closestObjectWithinReach.transform);
-
-//				Debug.Log("right trigger released, grabbed:" + closestObjectWithinReach);
-				// TODO: show inventory icon
+				// grab it!
+				GrabObject(closestObjectWithinReach);
 			}
 		}
-
-
 		// Same thing for the left arm
 		if ((Input.GetAxis("LeftTrigger") > 0f) && (leftArmExtended == false)) {
 			// left trigger pushed
 			leftArmExtended = true;
 		}
 		// TODO: left arm implementation....
+
+
+		// Auto grab objects when they collide with the astronaut 
+		if (useWithNoController == true) {
+			GameObject debrisToGrab = null;
+			foreach (GameObject debris in debrisWithinReach) {
+				float dist = Vector3.Distance(transform.position, debris.transform.position);
+				if (dist < 1.5f) {
+					// object is close enough to grab it. Grab it!
+					Debug.Log("AUTO GRABBING OBJECT!!:" + debris);
+					debrisToGrab = debris;
+				}
+			}
+			if (debrisToGrab != null) {
+				GrabObject(debrisToGrab);
+			}
+		}
+
+
+		// == GAME LOGIC TO SPAWN PARTNER ==
+		// Partner timer
+		if (partnerSpawnTimer > 0) {
+			partnerSpawnTimer -= Time.deltaTime;
+		}
+		// Check if it's time to spawn the "partner"
+		if ((partner == null) && (minimumTimeToSpawnPartner <= 0)) {
+			// spawn partners
+		}
+
+
+		// == EXPLODE OBJECT ==
+		// when user presses button close to a debris
 		if( Input.GetButton("Explode")) {
 			if(closestObjectWithinReach != null && closestObjectWithinReach.transform != null) {
 				myExp = Instantiate(explosion, closestObjectWithinReach.transform.position,
@@ -163,13 +189,27 @@ public class PlayerSpaceController : MonoBehaviour {
 		}
 	}
 
+	void GrabObject(GameObject debris) {
+//		holdingRightHand = closestObjectWithinReach;
+
+		// play sfx
+		audio.PlayOneShot (debris.GetComponent<DebrisAudio> ().audioClip);
+
+		debrisWithinReach.Remove(debris);
+		
+		// tell the debris manager to remove the object
+		debrisManager.RemoveDebris(debris.transform);
+		
+//				Debug.Log("right trigger released, grabbed:" + closestObjectWithinReach);
+		// TODO: show inventory icon
+	}
+
 	void OnTriggerEnter(Collider other) {
 //		Debug.Log ("Collision Enter! with:" + other.gameObject.tag);
 
 		// track all objects within reach
 		if (other.gameObject.tag == "Debris") {
 			debrisWithinReach.Add(other.gameObject);
-
 		}
 	}
 
