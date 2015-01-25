@@ -13,6 +13,7 @@ public class PlayerSpaceController : MonoBehaviour {
 	public Transform fadeToBlackSprite; // this is a black sprite place right in front of the eyes to fade the scene to black
 	public Transform handInHandWinner; // link to the hand in hand model that we show for the win condition
 	public HUDVisor hudVisor; // link
+	public Fuel fuelObj;
 
 	public TextMesh whatDoWeDoNowText; // a link to text mesh
 	public TextMesh whereDoWeGoNowText; // a link to text mesh 
@@ -20,8 +21,8 @@ public class PlayerSpaceController : MonoBehaviour {
 	private const float LOW_USAGE = 0.001f;
 	private const float HIGH_USAGE = 0.01f;
 
-	private Fuel fuelObj;
-	private Canvas canvasPrefab;
+//	private Fuel fuelObj;
+	public Canvas canvasPrefab;
 
 	private Object myExp; 
 
@@ -78,8 +79,8 @@ public class PlayerSpaceController : MonoBehaviour {
 		fadeToBlackSprite.GetComponent<SpriteRenderer>().material.color = new Color(Color.white.r, Color.white.g, Color.white.b, 0f);
 		fadeToBlackSprite.gameObject.SetActive (true);
 
-		fuelObj = (Fuel)GameObject.FindObjectOfType(typeof(Fuel));
-		canvasPrefab = (Canvas)GameObject.FindObjectOfType(typeof(Canvas));
+//		fuelObj = (Fuel)GameObject.FindObjectOfType(typeof(Fuel));
+//		canvasPrefab = (Canvas)GameObject.FindObjectOfType(typeof(Canvas));
 		fuelObj.usageRate = 0;
 	}
 
@@ -113,7 +114,7 @@ public class PlayerSpaceController : MonoBehaviour {
 		// set bool to allow player to turn
 		earthHasExploded = true;
 		allowRotation = true;
-		canvasPrefab.enabled = true;
+		canvasPrefab.gameObject.SetActive(true);
 		fuelObj.usageRate = LOW_USAGE;
 
 		innerTimer = 6.0f; // wait for 6 seconds with the option to skip.
@@ -162,6 +163,7 @@ public class PlayerSpaceController : MonoBehaviour {
 
 			// point camera down.
 			transform.rotation = Quaternion.Euler (90f, 0f, 0f);
+			transform.position = new Vector3(0f,0f,0f);
 
 			// start them moving forward
 			handInHand.rigidbody.AddForce (transform.forward);
@@ -350,7 +352,7 @@ public class PlayerSpaceController : MonoBehaviour {
 			GameObject debrisToGrab = null;
 			foreach (GameObject debris in debrisWithinReach) {
 				float dist = Vector3.Distance(transform.position, debris.transform.position);
-				if (dist < 3.0f) {
+				if (dist < 1.5f) {
 					// object is close enough to grab it. Grab it!
 //					Debug.Log("AUTO GRABBING OBJECT!!:" + debris);
 					debrisToGrab = debris;
@@ -371,7 +373,7 @@ public class PlayerSpaceController : MonoBehaviour {
 			// Check if it's time to spawn the "partner"
 			if ((partner == null) && (partnerSpawnTimer >= minimumTimeToSpawnPartner) && (objectsCollected.Count >= minObjectsBeforeSpawning)) {
 				RespawnPartner();
-			} else if ((partner != null) && (partnerSpawnTimer >= minimumTimeToSpawnPartner)) {
+			} else if ((partner != null) && (partnerFound == false) && (partnerSpawnTimer >= minimumTimeToSpawnPartner)) {
 				// parter already spawned, check if the player has turned and we need to respawn
 				float distFromPartner = Vector3.Distance(partner.position, transform.position);
 				if (distFromPartner > 83f) {
@@ -385,7 +387,7 @@ public class PlayerSpaceController : MonoBehaviour {
 		if (partner != null) {
 			Vector2 posOnScreen = leftEyeAnchor.camera.WorldToScreenPoint(partner.transform.position);
 			float dist = Vector2.Distance(posOnScreen, new Vector2(Screen.width * 0.5f, Screen.height * 0.5f));
-			if (dist < minDistance) {
+			if (dist < 3.0f) {
 				// partner is right in front of us.
 				// play fast breathing
 				hudVisor.PlayBreathingFast();
