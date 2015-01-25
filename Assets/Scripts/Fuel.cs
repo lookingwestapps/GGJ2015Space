@@ -14,6 +14,10 @@ public class Fuel : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		fuelBarSlider.value = fuel/100;
+		fuel -= 1;
+		if(fuel < 0) {
+			fuel = 100;
+		}
+		fuelBarSlider.value = fuel/100.0f;
 	}
 }

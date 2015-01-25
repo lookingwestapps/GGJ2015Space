@@ -91,4 +91,11 @@ public class DebrisManager : MonoBehaviour {
 		// create another object
 		CreateDebrisOnEdge();
 	}
+	public void RemoveAllDebris() {
+		foreach (Transform debris in allDebris) {
+			// destroy object
+			Destroy (debris.gameObject);
+		}
+		allDebris.Clear();
+	}
 }

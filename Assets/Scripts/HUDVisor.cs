@@ -3,7 +3,18 @@ using System.Collections;
 
 public class HUDVisor : MonoBehaviour {
 
-	public Sprite[] allIcons;
+	public Transform sriracha;
+	public Transform clockIcon;
+	public Transform nesController;
+	public Transform phonographIcon;
+	public Transform bearIcon;
+	public Transform tacoIcon;
+	public Transform coffeeIcon;
+	public Transform paintingIcon;
+	public Transform pizzaIcon;
+	public Transform carIcon;
+
+
 
 	// Use this for initialization
 	void Start () {
@@ -18,11 +29,29 @@ public class HUDVisor : MonoBehaviour {
 	public void PickedUpObject(GameObject pickup) {
 		// show the sprite icon for the pickup
 		Sprite pickupIcon = pickup.GetComponent<DebrisAudio> ().HUDIconForThisDebris;
-		foreach (Sprite icon in allIcons) {
-			if (icon == pickupIcon) {
-				// show this icon
-//				icon.GetComponent<SpriteRenderer>().enabled = true;
-			}
+		Debug.Log("Pickedup ICON:" + pickupIcon.ToString());
+		if (pickupIcon.ToString() == "car (UnityEngine.Sprite)") {
+			carIcon.renderer.enabled = true;
+		} else if (pickupIcon.ToString() == "bear (UnityEngine.Sprite)") {
+			bearIcon.renderer.enabled = true;
+		} else if (pickupIcon.ToString() == "clock (UnityEngine.Sprite)") {
+			clockIcon.renderer.enabled = true;
+		} else if (pickupIcon.ToString() == "controller (UnityEngine.Sprite)") {
+			nesController.renderer.enabled = true;
+		} else if (pickupIcon.ToString() == "painting (UnityEngine.Sprite)") {
+			paintingIcon.renderer.enabled = true;
+		} else if (pickupIcon.ToString() == "phonograph (UnityEngine.Sprite)") {
+			phonographIcon.renderer.enabled = true;
+		} else if (pickupIcon.ToString() == "pizza (UnityEngine.Sprite)") {
+			pizzaIcon.renderer.enabled = true;
+		} else if (pickupIcon.ToString() == "sriracha (UnityEngine.Sprite)") {
+			sriracha.renderer.enabled = true;
+		} else if (pickupIcon.ToString() == "starbucks (UnityEngine.Sprite)") {
+			coffeeIcon.renderer.enabled = true;
+		} else if (pickupIcon.ToString() == "taco (UnityEngine.Sprite)") {
+			tacoIcon.renderer.enabled = true;
+		} else {
+			Debug.Log("ERROR can't find icon!"); // shouldn't run
 		}
 	}
 }

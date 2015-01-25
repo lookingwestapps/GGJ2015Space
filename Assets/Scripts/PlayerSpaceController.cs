@@ -24,6 +24,8 @@ public class PlayerSpaceController : MonoBehaviour {
 
 	private List<GameObject> debrisWithinReach;
 	private bool earthHasExploded;
+	private bool allowRotation;
+	private bool partnerFound;
 	private List<GameObject> objectsCollected;
 //	private GameObject holdingLeftHand; // what each hand is currently holding or null
 //	private GameObject holdingRightHand;
@@ -92,12 +94,13 @@ public class PlayerSpaceController : MonoBehaviour {
 
 		// create debris cloud
 		debrisManager.CreateInitialDebris();
-
+		
 		// set bool to allow player to turn
 		earthHasExploded = true;
+		allowRotation = true;
 
 		innerTimer = 6.0f; // wait for 6 seconds with the option to skip.
-		while ((innerTimer > 0) && (earthHasExploded == false)) {
+		while ((innerTimer > 0) && (skipOpeningScene == false)) {
 			innerTimer -= Time.deltaTime;
 			yield return 0;
 		}
@@ -111,49 +114,71 @@ public class PlayerSpaceController : MonoBehaviour {
 	}
 	
 	IEnumerator PartnerFound() {
-		// HURRAY!
-		// fade in black rect in front of eyes
-		for (int i = 0; i <= 60; i++) {
-			float alpha = (float)i / 60;
-			fadeToBlackSprite.GetComponent<SpriteRenderer>().material.color = new Color(Color.white.r, Color.white.g, Color.white.b, alpha);
-			yield return 0;
-		}
+		if (partnerFound == false) { // only run once
+			partnerFound = true;
+			// HURRAY! THIS RUNS WHEN YOU WIN!
+			// fade in black rect in front of eyes
+			for (int i = 0; i <= 20; i++) {
+				float alpha = (float)i / 20;
+				fadeToBlackSprite.GetComponent<SpriteRenderer>().material.color = new Color(Color.white.r, Color.white.g, Color.white.b, alpha);
+				yield return 0;
+			}
 
-		// load up the hand in hand model,
+			// load up the hand in hand model,
+			Transform handInHand = (Transform)Instantiate (handInHandWinner);
+			// add handInHand to the player object
+			handInHand.parent = transform;
+			// position relative to cam
+			handInHand.localPosition = new Vector3 (0, 0, 10);
 
-		// start them moving forward
+			// remove debris field
+			debrisManager.RemoveAllDebris ();
 
-		// match the camera motion, just a little bit slower so the model floats away
+			// don't allow turning anymore
+			allowRotation = false;
 
-		// small pause
-		yield return new WaitForSeconds (1.0f);
+			// hide helmet
+			hudVisor.gameObject.SetActive (false);
 
-		// fade in scene
-		// fade out black rect in front of eyes
-		for (int i = 80; i >= 0; i--) {
-			float alpha = (float)i / 80f;
-			fadeToBlackSprite.GetComponent<SpriteRenderer>().material.color = new Color(Color.white.r, Color.white.g, Color.white.b, alpha);
-			yield return 0;
-		}
+			// point camera down.
+			transform.rotation = Quaternion.Euler (90f, 0f, 0f);
 
-		// pause to watch
-		yield return new WaitForSeconds (2.0f);
+			// start them moving forward
+			handInHand.rigidbody.AddForce (transform.forward);
+			handInHand.rigidbody.AddTorque (new Vector3(5f, 0f, 10f));
 
-		// fade in black rect in front of eyes
-		for (int i = 0; i <= 60; i++) {
-			float alpha = (float)i / 60;
-			fadeToBlackSprite.GetComponent<SpriteRenderer>().material.color = new Color(Color.white.r, Color.white.g, Color.white.b, alpha);
-			yield return 0;
-		}
+			// match the camera motion, just a little bit slower so the model floats away
 
-		// load credits
+			// small pause
+			yield return new WaitForSeconds (0.2f);
 
-		// fade scene in
-		// fade out for the last time
-		for (int i = 80; i >= 0; i--) {
-			float alpha = (float)i / 80f;
-			fadeToBlackSprite.GetComponent<SpriteRenderer>().material.color = new Color(Color.white.r, Color.white.g, Color.white.b, alpha);
-			yield return 0;
+			// fade in scene
+			// fade out black rect in front of eyes
+			for (int i = 80; i >= 0; i--) {
+				float alpha = (float)i / 80f;
+				fadeToBlackSprite.GetComponent<SpriteRenderer>().material.color = new Color(Color.white.r, Color.white.g, Color.white.b, alpha);
+				yield return 0;
+			}
+
+			// pause to watch
+			yield return new WaitForSeconds (10.0f);
+
+			// fade in black rect in front of eyes
+			for (int i = 0; i <= 60; i++) {
+				float alpha = (float)i / 60;
+				fadeToBlackSprite.GetComponent<SpriteRenderer>().material.color = new Color(Color.white.r, Color.white.g, Color.white.b, alpha);
+				yield return 0;
+			}
+
+			// load credits
+
+			// fade scene in
+			// fade out for the last time
+			for (int i = 80; i >= 0; i--) {
+				float alpha = (float)i / 80f;
+				fadeToBlackSprite.GetComponent<SpriteRenderer>().material.color = new Color(Color.white.r, Color.white.g, Color.white.b, alpha);
+				yield return 0;
+			}
 		}
 
 
@@ -200,7 +225,7 @@ public class PlayerSpaceController : MonoBehaviour {
 			h = centerEyeAnchor.localRotation.y * turningByLookingSensitivity.y;
 		}
 
-		if (earthHasExploded == true) { // only allow rotation after the earth has exploded
+		if (allowRotation == true) { // only allow rotation after the earth has exploded
 			transform.Rotate(new Vector3(v, h, 0));
 		}
 
@@ -224,7 +249,7 @@ public class PlayerSpaceController : MonoBehaviour {
 
 		                        
 		// ADD THRUST
-		if (earthHasExploded == true) { // only allow rotation after the earth has exploded
+		if (allowRotation == true) { // only allow thrust after the earth has exploded
 			if (Input.GetButton("Thrust")) {
 				movementSpeed += thrustSensitivity * Time.deltaTime;
 			}
@@ -294,7 +319,7 @@ public class PlayerSpaceController : MonoBehaviour {
 			GameObject debrisToGrab = null;
 			foreach (GameObject debris in debrisWithinReach) {
 				float dist = Vector3.Distance(transform.position, debris.transform.position);
-				if (dist < 1.5f) {
+				if (dist < 3.0f) {
 					// object is close enough to grab it. Grab it!
 //					Debug.Log("AUTO GRABBING OBJECT!!:" + debris);
 					debrisToGrab = debris;
@@ -314,15 +339,14 @@ public class PlayerSpaceController : MonoBehaviour {
 			}
 			// Check if it's time to spawn the "partner"
 			if ((partner == null) && (partnerSpawnTimer >= minimumTimeToSpawnPartner) && (objectsCollected.Count >= minObjectsBeforeSpawning)) {
-				// spawn partner
-				partner = (Transform)Instantiate(partnerPrefab);
-				// position the partner right in front of the player in the distance
-				partner.position = transform.position + (centerEyeAnchor.forward * 80);
-				partner.rotation = transform.rotation;
-				Debug.Log("Spawning Partner!");
+				RespawnPartner();
 			} else if ((partner != null) && (minimumTimeToSpawnPartner <= 0)) {
 				// parter already spawned, check if the player has turned and we need to respawn
-				// TODO:
+				float distFromPartner = Vector3.Distance(partner.position, transform.position);
+				if (distFromPartner > 83) {
+					Debug.Log("re spawning parter");
+					RespawnPartner();
+				}
 			}
 		}
 
@@ -332,11 +356,26 @@ public class PlayerSpaceController : MonoBehaviour {
 			// when the dpad up is pressed, skip the opening scene
 			skipOpeningScene = true;
 		}
+		if (Input.GetButtonUp("DPadLeft")) {
+			// when the dpad up is pressed, skip the opening scene
+			StartCoroutine("PartnerFound");
+		}
 		// == EXPLODE OBJECT ==
 		// when user presses button close to a debris
 //		if( Input.GetButtonUp("Explode")) {
 //			BlowUpTheEarth();
 //		}
+	}
+	void RespawnPartner() {
+		// spawn partner
+		if (partner != null) {
+			Destroy(partner);
+		}
+		partner = (Transform)Instantiate(partnerPrefab);
+		// position the partner right in front of the player in the distance
+		partner.position = transform.position + (centerEyeAnchor.forward * 80);
+		partner.rotation = transform.rotation;
+		Debug.Log("Spawning Partner!");
 	}
 
 	void BlowUpTheEarth() {
