@@ -1,0 +1,164 @@
+fileFormatVersion: 2
+guid: 0a111aeb6e791484588b59d07937f2ed
+ModelImporter:
+  serializedVersion: 16
+  fileIDToRecycleName:
+    100000: alarmClock_geo
+    100002: alarmClock_main
+    100004: astronaut_geo
+    100006: hotWheels_geo
+    100008: hotWheels_main
+    100010: MonaLisa_geo
+    100012: monaLisa_main
+    100014: NEScontroller
+    100016: NEScontroller 1
+    100018: phonograph_main
+    100020: phonographBox_geo
+    100022: phonographComponent01_geo
+    100024: phonographHandle_geo
+    100026: phonographMegaphone_geo
+    100028: phonographRecord_geo
+    100030: //RootNode
+    100032: pizza_geo
+    100034: pizza_main
+    100036: Spaceman_main
+    100038: SrirachaBottle_geo
+    100040: srirachaBottle_main
+    100042: Starbucks_geo
+    100044: starbucks_main
+    100046: taco_geo
+    100048: Taco_main
+    100050: tacoLettuce_geo
+    100052: teddyBear_geo
+    100054: teddyBear_main
+    400000: alarmClock_geo
+    400002: alarmClock_main
+    400004: astronaut_geo
+    400006: hotWheels_geo
+    400008: hotWheels_main
+    400010: MonaLisa_geo
+    400012: monaLisa_main
+    400014: NEScontroller
+    400016: NEScontroller 1
+    400018: phonograph_main
+    400020: phonographBox_geo
+    400022: phonographComponent01_geo
+    400024: phonographHandle_geo
+    400026: phonographMegaphone_geo
+    400028: phonographRecord_geo
+    400030: //RootNode
+    400032: pizza_geo
+    400034: pizza_main
+    400036: Spaceman_main
+    400038: SrirachaBottle_geo
+    400040: srirachaBottle_main
+    400042: Starbucks_geo
+    400044: starbucks_main
+    400046: taco_geo
+    400048: Taco_main
+    400050: tacoLettuce_geo
+    400052: teddyBear_geo
+    400054: teddyBear_main
+    2300000: alarmClock_geo
+    2300002: astronaut_geo
+    2300004: hotWheels_geo
+    2300006: MonaLisa_geo
+    2300008: NEScontroller 1
+    2300010: phonographBox_geo
+    2300012: phonographComponent01_geo
+    2300014: phonographHandle_geo
+    2300016: phonographMegaphone_geo
+    2300018: phonographRecord_geo
+    2300020: pizza_geo
+    2300022: SrirachaBottle_geo
+    2300024: Starbucks_geo
+    2300026: taco_geo
+    2300028: tacoLettuce_geo
+    2300030: teddyBear_geo
+    3300000: alarmClock_geo
+    3300002: astronaut_geo
+    3300004: hotWheels_geo
+    3300006: MonaLisa_geo
+    3300008: NEScontroller 1
+    3300010: phonographBox_geo
+    3300012: phonographComponent01_geo
+    3300014: phonographHandle_geo
+    3300016: phonographMegaphone_geo
+    3300018: phonographRecord_geo
+    3300020: pizza_geo
+    3300022: SrirachaBottle_geo
+    3300024: Starbucks_geo
+    3300026: taco_geo
+    3300028: tacoLettuce_geo
+    3300030: teddyBear_geo
+    4300000: pizza_geo
+    4300002: alarmClock_geo
+    4300004: hotWheels_geo
+    4300006: MonaLisa_geo
+    4300008: phonographMegaphone_geo
+    4300010: phonographBox_geo
+    4300012: phonographRecord_geo
+    4300014: phonographComponent01_geo
+    4300016: phonographHandle_geo
+    4300018: SrirachaBottle_geo
+    4300020: teddyBear_geo
+    4300022: NEScontroller
+    4300024: taco_geo
+    4300026: tacoLettuce_geo
+    4300028: astronaut_geo
+    4300030: Starbucks_geo
+    9500000: //RootNode
+  materials:
+    importMaterials: 1
+    materialName: 0
+    materialSearch: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    optimizeGameObjects: 0
+    motionNodeName: 
+    animationCompression: 1
+    animationRotationError: .5
+    animationPositionError: .5
+    animationScaleError: .5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: .00999999978
+    meshCompression: 0
+    addColliders: 0
+    importBlendShapes: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    weldVertices: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+  tangentSpace:
+    normalSmoothAngle: 60
+    splitTangentsAcrossUV: 1
+    normalImportMode: 0
+    tangentImportMode: 1
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    human: []
+    skeleton: []
+    armTwist: .5
+    foreArmTwist: .5
+    upperLegTwist: .5
+    legTwist: .5
+    armStretch: .0500000007
+    legStretch: .0500000007
+    feetSpacing: 0
+    rootMotionBoneName: 
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 2
+  additionalBone: 0
+  userData: 

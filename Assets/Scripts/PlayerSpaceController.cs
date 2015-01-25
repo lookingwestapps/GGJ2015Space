@@ -12,6 +12,7 @@ public class PlayerSpaceController : MonoBehaviour {
 	public GameObject explosion; // for detonator prefab
 	public Transform fadeToBlackSprite; // this is a black sprite place right in front of the eyes to fade the scene to black
 	public Transform handInHandWinner; // link to the hand in hand model that we show for the win condition
+	public HUDVisor hudVisor; // link
 
 	public TextMesh whatDoWeDoNowText; // a link to text mesh
 
@@ -23,12 +24,38 @@ public class PlayerSpaceController : MonoBehaviour {
 
 	private List<GameObject> debrisWithinReach;
 	private bool earthHasExploded;
+	private List<GameObject> objectsCollected;
 //	private GameObject holdingLeftHand; // what each hand is currently holding or null
 //	private GameObject holdingRightHand;
+
+	
+	public Vector2 leftStickSensitivity = new Vector2(2,2);
+	public Vector2 turningByLookingSensitivity = new Vector2(2,2);
+	public bool invertYAxis = false;
+	
+	public float thrustSensitivity = 1f;
+	public float speedWhileTurning = 4.0f;
+	
+	public Transform grabText;
+	
+	private bool leftArmExtended;
+	private bool rightArmExtended;
+	
+	public DebrisManager debrisManager; // a link to the debris manager
+	
+	private Transform partner; // this is the goal object that appears after playing a while
+	public Transform partnerPrefab;
+	public float minimumTimeToSpawnPartner = 60f;
+	public float minObjectsBeforeSpawning = 2;
+	private float partnerSpawnTimer = 0f;
+	
+	public Transform earth; // link to the earth.
+
 
 	// Use this for initialization
 	void Start () {
 		debrisWithinReach = new List<GameObject> ();
+		objectsCollected = new List<GameObject> ();
 
 		StartCoroutine ("ExplodeEarthAfterDelay");
 
@@ -148,28 +175,6 @@ public class PlayerSpaceController : MonoBehaviour {
 			yield return 0;
 		}
 	}
-
-	public Vector2 leftStickSensitivity = new Vector2(2,2);
-	public Vector2 turningByLookingSensitivity = new Vector2(2,2);
-	public bool invertYAxis = false;
-
-	public float thrustSensitivity = 1f;
-	public float speedWhileTurning = 4.0f;
-
-	public Transform grabText;
-
-	private bool leftArmExtended;
-	private bool rightArmExtended;
-
-	public DebrisManager debrisManager; // a link to the debris manager
-
-	private Transform partner; // this is the goal object that appears after playing a while
-	public Transform partnerPrefab;
-	public float minimumTimeToSpawnPartner = 60f;
-	private float partnerSpawnTimer = 0f;
-
-	public Transform earth; // link to the earth.
-
 
 	// Update is called once per frame
 	void Update () {
@@ -302,19 +307,19 @@ public class PlayerSpaceController : MonoBehaviour {
 
 
 		// == GAME LOGIC TO SPAWN PARTNER ==
-		// Partner timer decrement, once player has control
 		if (earthHasExploded == true) {
+			// Partner timer decrement, once player has control
 			if (partnerSpawnTimer < minimumTimeToSpawnPartner) {
 				partnerSpawnTimer += Time.deltaTime;
 			}
 			// Check if it's time to spawn the "partner"
-			if ((partner == null) && (partnerSpawnTimer >= minimumTimeToSpawnPartner)) {
+			if ((partner == null) && (partnerSpawnTimer >= minimumTimeToSpawnPartner) && (objectsCollected.Count >= minObjectsBeforeSpawning)) {
 				// spawn partner
 				partner = (Transform)Instantiate(partnerPrefab);
 				// position the partner right in front of the player in the distance
 				partner.position = transform.position + (centerEyeAnchor.forward * 80);
 				partner.rotation = transform.rotation;
-//				Debug.Log("Spawning Partner!");
+				Debug.Log("Spawning Partner!");
 			} else if ((partner != null) && (minimumTimeToSpawnPartner <= 0)) {
 				// parter already spawned, check if the player has turned and we need to respawn
 				// TODO:
@@ -342,6 +347,7 @@ public class PlayerSpaceController : MonoBehaviour {
 
 	void GrabObject(GameObject debris) {
 //		holdingRightHand = closestObjectWithinReach;
+		objectsCollected.Add(debris);
 
 		// play sfx
 		audio.PlayOneShot (debris.GetComponent<DebrisAudio> ().audioClip);
@@ -353,6 +359,7 @@ public class PlayerSpaceController : MonoBehaviour {
 		
 //				Debug.Log("right trigger released, grabbed:" + closestObjectWithinReach);
 		// TODO: show inventory icon
+		hudVisor.PickedUpObject (debris);
 	}
 
 	void OnTriggerEnter(Collider other) {
