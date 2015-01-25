@@ -14,6 +14,7 @@ public class PlayerSpaceController : MonoBehaviour {
 	public Transform handInHandWinner; // link to the hand in hand model that we show for the win condition
 	public HUDVisor hudVisor; // link
 	public Fuel fuelObj;
+	public Transform credits;
 
 	public TextMesh whatDoWeDoNowText; // a link to text mesh
 	public TextMesh whereDoWeGoNowText; // a link to text mesh 
@@ -78,6 +79,10 @@ public class PlayerSpaceController : MonoBehaviour {
 
 		fadeToBlackSprite.GetComponent<SpriteRenderer>().material.color = new Color(Color.white.r, Color.white.g, Color.white.b, 0f);
 		fadeToBlackSprite.gameObject.SetActive (true);
+
+		credits.GetComponent<SpriteRenderer>().material.color = new Color(Color.white.r, Color.white.g, Color.white.b, 0f);
+		credits.GetComponent<SpriteRenderer> ().enabled = true;
+		credits.gameObject.SetActive (true);
 
 //		fuelObj = (Fuel)GameObject.FindObjectOfType(typeof(Fuel));
 //		canvasPrefab = (Canvas)GameObject.FindObjectOfType(typeof(Canvas));
@@ -194,23 +199,37 @@ public class PlayerSpaceController : MonoBehaviour {
 			// pause to watch
 			yield return new WaitForSeconds (10.0f);
 
-			// fade in black rect in front of eyes
+//			// fade in black rect in front of eyes
+//			for (int i = 0; i <= 60; i++) {
+//				float alpha = (float)i / 60;
+//				fadeToBlackSprite.GetComponent<SpriteRenderer>().material.color = new Color(Color.white.r, Color.white.g, Color.white.b, alpha);
+//				yield return 0;
+//			}
+
+			// fade in credits
+			for (int i = 0; i <= 60; i++) {
+				float alpha = (float)i / 60;
+				credits.GetComponent<SpriteRenderer>().material.color = new Color(Color.white.r, Color.white.g, Color.white.b, alpha);
+				yield return 0;
+			}
+
+			// pause to read credits
+			yield return new WaitForSeconds (30.0f);
+
+//			// fade out for the last time
 			for (int i = 0; i <= 60; i++) {
 				float alpha = (float)i / 60;
 				fadeToBlackSprite.GetComponent<SpriteRenderer>().material.color = new Color(Color.white.r, Color.white.g, Color.white.b, alpha);
 				yield return 0;
 			}
 
-			// load credits
 
 
-			// fade scene in
-			// fade out for the last time
-			for (int i = 80; i >= 0; i--) {
-				float alpha = (float)i / 80f;
-				fadeToBlackSprite.GetComponent<SpriteRenderer>().material.color = new Color(Color.white.r, Color.white.g, Color.white.b, alpha);
-				yield return 0;
-			}
+//			for (int i = 80; i >= 0; i--) {
+//				float alpha = (float)i / 80f;
+//				fadeToBlackSprite.GetComponent<SpriteRenderer>().material.color = new Color(Color.white.r, Color.white.g, Color.white.b, alpha);
+//				yield return 0;
+//			}
 		}
 
 
