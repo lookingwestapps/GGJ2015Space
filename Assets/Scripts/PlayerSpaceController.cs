@@ -85,7 +85,12 @@ public class PlayerSpaceController : MonoBehaviour {
 	
 	IEnumerator PartnerFound() {
 		// HURRAY!
-		FadeOutScene ();
+		// fade in black rect in front of eyes
+		for (int i = 0; i <= 60; i++) {
+			float alpha = (float)i / 60;
+			fadeToBlackSprite.GetComponent<SpriteRenderer>().material.color = new Color(Color.white.r, Color.white.g, Color.white.b, alpha);
+			yield return 0;
+		}
 
 		// load up the hand in hand model,
 
@@ -93,17 +98,37 @@ public class PlayerSpaceController : MonoBehaviour {
 
 		// match the camera motion, just a little bit slower so the model floats away
 
+		// small pause
+		yield return new WaitForSeconds (1.0f);
+
 		// fade in scene
-		FadeInScene ();
+		// fade out black rect in front of eyes
+		for (int i = 80; i >= 0; i--) {
+			float alpha = (float)i / 80f;
+			fadeToBlackSprite.GetComponent<SpriteRenderer>().material.color = new Color(Color.white.r, Color.white.g, Color.white.b, alpha);
+			yield return 0;
+		}
 
 		// pause to watch
+		yield return new WaitForSeconds (2.0f);
 
-		// fade out for the last time
+		// fade in black rect in front of eyes
+		for (int i = 0; i <= 60; i++) {
+			float alpha = (float)i / 60;
+			fadeToBlackSprite.GetComponent<SpriteRenderer>().material.color = new Color(Color.white.r, Color.white.g, Color.white.b, alpha);
+			yield return 0;
+		}
 
 		// load credits
 
 		// fade scene in
-		FadeInScene ();
+		// fade out for the last time
+		for (int i = 80; i >= 0; i--) {
+			float alpha = (float)i / 80f;
+			fadeToBlackSprite.GetComponent<SpriteRenderer>().material.color = new Color(Color.white.r, Color.white.g, Color.white.b, alpha);
+			yield return 0;
+		}
+
 
 		yield return 0;
 	}
@@ -339,6 +364,7 @@ public class PlayerSpaceController : MonoBehaviour {
 		} else if (other.gameObject.tag == "Partner") {
 			// REACHED GOAL OF FINDING PARTNER! GAME WIN!!
 			// fade out scene
+			Debug.Log("FADING OUT");
 			StartCoroutine("PartnerFound");
 		}
 
