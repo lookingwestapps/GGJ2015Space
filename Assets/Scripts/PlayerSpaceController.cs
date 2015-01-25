@@ -182,10 +182,22 @@ public class PlayerSpaceController : MonoBehaviour {
 		// == EXPLODE OBJECT ==
 		// when user presses button close to a debris
 		if( Input.GetButton("Explode")) {
+			/*
 			if(closestObjectWithinReach != null && closestObjectWithinReach.transform != null) {
 				myExp = Instantiate(explosion, closestObjectWithinReach.transform.position,
 				            Quaternion.identity);
-			}
+			}*/
+			/*
+			Debug.Log("In Explode...");
+			GameObject go = GameObject.Find("Earth");
+			Debug.Log("go is", go);
+			Earth other = (Earth) go.GetComponent(typeof(Earth));
+			Debug.Log("found ",other);
+
+			other.doExplode();
+			*/
+			Earth go = (Earth)GameObject.FindObjectOfType(typeof(Earth));
+			go.doExplode();
 		}
 	}
 
