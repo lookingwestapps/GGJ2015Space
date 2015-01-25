@@ -12,7 +12,7 @@ public class PlayerSpaceController : MonoBehaviour {
 	public GameObject explosion; // for detonator prefab
 	public Transform fadeToBlackSprite; // this is a black sprite place right in front of the eyes to fade the scene to black
 	public Transform handInHandWinner; // link to the hand in hand model that we show for the win condition
-	public Transform HUDVisor; // link
+	public Transform hudVisor; // link
 
 	public TextMesh whatDoWeDoNowText; // a link to text mesh
 
@@ -359,7 +359,7 @@ public class PlayerSpaceController : MonoBehaviour {
 		
 //				Debug.Log("right trigger released, grabbed:" + closestObjectWithinReach);
 		// TODO: show inventory icon
-
+		hudVisor.PickedUpObject (debris);
 	}
 
 	void OnTriggerEnter(Collider other) {

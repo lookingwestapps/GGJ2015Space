@@ -12,4 +12,9 @@ public class HUDVisor : MonoBehaviour {
 	void Update () {
 	
 	}
+
+	public void PickedUpObject(GameObject pickup) {
+		// show the sprite icon for the pickup
+		Sprite pickupIcon = pickup.GetComponent<DebrisAudio> ().HUDIconForThisDebris;
+	}
 }
