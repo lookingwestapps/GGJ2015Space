@@ -16,6 +16,12 @@ public class PlayerSpaceController : MonoBehaviour {
 
 	public TextMesh whatDoWeDoNowText; // a link to text mesh
 
+	private const float LOW_USAGE = 0.001f;
+	private const float HIGH_USAGE = 0.01f;
+
+	private Fuel fuelObj;
+	private Canvas canvasPrefab;
+
 	private Object myExp; 
 
 	public bool useWithNoController = true;
@@ -66,6 +72,10 @@ public class PlayerSpaceController : MonoBehaviour {
 
 		fadeToBlackSprite.GetComponent<SpriteRenderer>().material.color = new Color(Color.white.r, Color.white.g, Color.white.b, 0f);
 		fadeToBlackSprite.gameObject.SetActive (true);
+
+		fuelObj = (Fuel)GameObject.FindObjectOfType(typeof(Fuel));
+		canvasPrefab = (Canvas)GameObject.FindObjectOfType(typeof(Canvas));
+		fuelObj.usageRate = 0;
 	}
 
 	IEnumerator ExplodeEarthAfterDelay() {
@@ -98,6 +108,8 @@ public class PlayerSpaceController : MonoBehaviour {
 		// set bool to allow player to turn
 		earthHasExploded = true;
 		allowRotation = true;
+		canvasPrefab.enabled = true;
+		fuelObj.usageRate = LOW_USAGE;
 
 		innerTimer = 6.0f; // wait for 6 seconds with the option to skip.
 		while ((innerTimer > 0) && (skipOpeningScene == false)) {
@@ -238,12 +250,14 @@ public class PlayerSpaceController : MonoBehaviour {
 				if (movementSpeed < speedWhileTurning) {
 					movementSpeed = speedWhileTurning;
 				}
+				fuelObj.usageRate = LOW_USAGE;
 			} else if (Vector2.SqrMagnitude(new Vector2(centerEyeAnchor.localRotation.x, centerEyeAnchor.localRotation.y)) < 0.02f) {
 				// speed up while looking straight ahead.
 				movementSpeed += thrustSensitivity * Time.deltaTime;
 				if (movementSpeed > maxSpeed) {
 					movementSpeed = maxSpeed;
 				}
+				fuelObj.usageRate = HIGH_USAGE;
 			}
 		}
 
