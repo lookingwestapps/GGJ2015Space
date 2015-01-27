@@ -59,9 +59,10 @@ public class PlayerSpaceController : MonoBehaviour {
 	public float minimumTimeToSpawnPartner = 60f;
 	public float minObjectsBeforeSpawning = 2;
 	private float partnerSpawnTimer = 0f;
+
+	private Transform cameraToUse; // choose the 2d camera to use if we don't have an oculus
 	
 	public Transform earth; // link to the earth.
-
 
 	// Use this for initialization
 	void Start () {
@@ -87,8 +88,12 @@ public class PlayerSpaceController : MonoBehaviour {
 //		fuelObj = (Fuel)GameObject.FindObjectOfType(typeof(Fuel));
 //		canvasPrefab = (Canvas)GameObject.FindObjectOfType(typeof(Canvas));
 		fuelObj.usageRate = 0;
+
+		cameraToUse = (centerEyeAnchor.gameObject.activeInHierarchy == true) ? centerEyeAnchor : GameObject.FindWithTag("MainCamera").transform; // choose the 2d camera to use if we don't have an oculus
+
 	}
 
+	// ANIMATION SEQUENCES using COROUTINES
 	IEnumerator ExplodeEarthAfterDelay() {
 		float innerTimer = 8.0f; // wait for 8 seconds with the option to skip.
 		while ((innerTimer > 0) && (skipOpeningScene == false)) {
@@ -217,14 +222,14 @@ public class PlayerSpaceController : MonoBehaviour {
 			yield return new WaitForSeconds (30.0f);
 
 //			// fade out for the last time
-			for (int i = 0; i <= 60; i++) {
-				float alpha = (float)i / 60;
-				fadeToBlackSprite.GetComponent<SpriteRenderer>().material.color = new Color(Color.white.r, Color.white.g, Color.white.b, alpha);
-				yield return 0;
-			}
+//			for (int i = 0; i <= 60; i++) {
+//				float alpha = (float)i / 60;
+//				fadeToBlackSprite.GetComponent<SpriteRenderer>().material.color = new Color(Color.white.r, Color.white.g, Color.white.b, alpha);
+//				yield return 0;
+//			}
 
 
-
+			// fade in
 //			for (int i = 80; i >= 0; i--) {
 //				float alpha = (float)i / 80f;
 //				fadeToBlackSprite.GetComponent<SpriteRenderer>().material.color = new Color(Color.white.r, Color.white.g, Color.white.b, alpha);
@@ -263,17 +268,31 @@ public class PlayerSpaceController : MonoBehaviour {
 		}
 
 		//  ==== MOVEMENT / ROTATION ====
-		// rotate the player based on user control.
+		// Steer the player based on controller right stick.
 		float h = Input.GetAxis ("Horizontal") * leftStickSensitivity.x;
 		float v = Input.GetAxis ("Vertical") * leftStickSensitivity.y;
 		if (invertYAxis) {
 			v *= -1;
 		}
 
+		// make keyboard controls (a,s,d,w and arrows) and left stick look around inside helmet, which then turns.
+		float lookH = Input.GetAxis ("LookHorizontal") * leftStickSensitivity.x;
+		float lookV = Input.GetAxis ("LookVertical") * leftStickSensitivity.y;
+		if (invertYAxis) {
+			lookV *= -1;
+		}
+
+		if ((lookH != 0) || (lookV != 0)) {
+			// rotate the camera inside the helmet
+			float degreesToLook = 3f; // how far to look up/down left/right
+			cameraToUse.localRotation = Quaternion.Euler(new Vector3(lookV * degreesToLook, lookH * degreesToLook, 0));
+		}
+		Debug.Log("lookH:" + lookH + " lookV:" + lookV + " centerEyeRot:" + cameraToUse.localRotation);
+
 		// ROTATE  where we are looking. If there is no controller input
 		if ((h == 0) && (v == 0)) {
-			v = centerEyeAnchor.localRotation.x * turningByLookingSensitivity.x;
-			h = centerEyeAnchor.localRotation.y * turningByLookingSensitivity.y;
+			v = cameraToUse.localRotation.x * turningByLookingSensitivity.x;
+			h = cameraToUse.localRotation.y * turningByLookingSensitivity.y;
 		}
 
 		if (allowRotation == true) { // only allow rotation after the earth has exploded
@@ -283,14 +302,14 @@ public class PlayerSpaceController : MonoBehaviour {
 //		Debug.Log ("v:" + v + " h:" + h + " rotation distance:" + Vector2.SqrMagnitude(new Vector2(centerEyeAnchor.localRotation.x, centerEyeAnchor.localRotation.y)));
 		// slow and speed up based on turning if there is no controller input selected
 		if (useWithNoController == true) {
-			if ((Mathf.Abs(centerEyeAnchor.localRotation.x) > 0.1f) || (Mathf.Abs(centerEyeAnchor.localRotation.y) > 0.1f)) {
+			if ((Mathf.Abs(cameraToUse.localRotation.x) > 0.1f) || (Mathf.Abs(cameraToUse.localRotation.y) > 0.1f)) {
 				// slow down while turning if there is no controller input selected
 				movementSpeed -= thrustSensitivity * Time.deltaTime * 4f;
 				if (movementSpeed < speedWhileTurning) {
 					movementSpeed = speedWhileTurning;
 				}
 				fuelObj.usageRate = LOW_USAGE;
-			} else if (Vector2.SqrMagnitude(new Vector2(centerEyeAnchor.localRotation.x, centerEyeAnchor.localRotation.y)) < 0.02f) {
+			} else if (Vector2.SqrMagnitude(new Vector2(cameraToUse.localRotation.x, cameraToUse.localRotation.y)) < 0.02f) {
 				// speed up while looking straight ahead.
 				movementSpeed += thrustSensitivity * Time.deltaTime;
 				if (movementSpeed > maxSpeed) {
@@ -309,12 +328,12 @@ public class PlayerSpaceController : MonoBehaviour {
 		}
 
 		// move in the direction the player is looking
-//		transform.position += centerEyeAnchor.forward * movementSpeed * Time.deltaTime;
+		//		transform.position += cameraToUse.forward * movementSpeed * Time.deltaTime;
 		// move in the direction the player is facing
 		transform.position += transform.forward * movementSpeed * Time.deltaTime;
 
 		// we must also position the player's space suit to follow the camera's movement from the position tracking camera
-		playerSpaceSuit.position = centerEyeAnchor.position;
+		playerSpaceSuit.position = cameraToUse.position;
 
 		// === GRABBING OBJECTS ==
 		// show UI "GRAB" text over any object that is both near enough and in our line of vision.
@@ -437,7 +456,7 @@ public class PlayerSpaceController : MonoBehaviour {
 		}
 		partner = (Transform)Instantiate(partnerPrefab);
 		// position the partner right in front of the player in the distance
-		partner.position = transform.position + (centerEyeAnchor.forward * 80);
+		partner.position = transform.position + (cameraToUse.forward * 80);
 		partner.rotation = transform.rotation;
 		Debug.Log("Spawning Partner!");
 	}

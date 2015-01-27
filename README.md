@@ -1,21 +1,34 @@
 # Memories Of Earth
 This game was created in 48 hours for the [2015 Global Gam Jam](http://globalgamejam.org/2015/games/memories-earth).
 
+This year’s theme was a question: “What do we do now?”
+
 ##### Status
-This commit (and the previous one) represents the state of the game at the end of the 48 hour game jam at time of submission.
+The game has been modified since the end of the game jam. You can checkout the commit from the end of the jam by cloning the repo and running: 
+```sh
+$ git checkout c6cfd903
+```
 
 ### Description
 
-A lone astronaut adrift in space after the total destruction of Earth. During your final moments you reflect on the memories that remain. Developed for the Oculus to provide total immersion.
+A lone astronaut adrift in space after the total destruction of Earth. During your final moments you reflect on the memories that remain. Developed for the Oculus Rift DK2 (SDK v0.4.4) to provide total immersion.
+
+### Download and Play
+
+- [Download Oculus Rift Windows Version](http://lookingwestapps.com/MOE/MemoriesOfEarthWin.zip)
+- [Download Oculus Rift MAC OS Version](http://lookingwestapps.com/MOE/MemoriesOfEarthMac.zip)
+- You can also play without a Rift [in the browser](http://lookingwestapps.com/MOE/MemoriesOfEarthVR.html).
 
 ### Controls
 
-No controller required, steer by tilting your head left-right and up-down.
+No controller required, steer by tilting your head left-right and up-down. Press the ’space’ key to recenter Oculus VR tracking. 
+
+For the browser version, steer with A,S,W,D or arrow keys.
 
 ### Credits
 This game was created by independent programmers, artists, and musicians in Denver, Colorado. None of us had worked together before starting.
 
-- Lead Programmer - **Alex Brancard**
+- Lead Programmer - **[Alex Brancard](lookingwestapps.com)**
 - Lead Artist - **Brandon Jenks**
 - Director - **Linh Ngo** 
 - Lead Sound Engineer - **Mike Bryant**
