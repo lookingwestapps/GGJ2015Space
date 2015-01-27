@@ -28,7 +28,7 @@ For the browser version, steer with A,S,W,D or arrow keys.
 ### Credits
 This game was created by independent programmers, artists, and musicians in Denver, Colorado. None of us had worked together before starting.
 
-- Lead Programmer - **[Alex Brancard](lookingwestapps.com)**
+- Lead Programmer - **[Alex Brancard](http://lookingwestapps.com)**
 - Lead Artist - **Brandon Jenks**
 - Director - **Linh Ngo** 
 - Lead Sound Engineer - **Mike Bryant**
