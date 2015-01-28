@@ -64,6 +64,10 @@ public class PlayerSpaceController : MonoBehaviour {
 	
 	public Transform earth; // link to the earth.
 
+	private GameObject objectWeAreGrabbingRightNow; // keep track of the object when we are in the middle of grabbing it
+	public Transform rightArm;  // link to arm object and animator controller
+
+
 	// Use this for initialization
 	void Start () {
 		debrisWithinReach = new List<GameObject> ();
@@ -170,6 +174,8 @@ public class PlayerSpaceController : MonoBehaviour {
 
 			// hide helmet
 			hudVisor.gameObject.SetActive (false);
+			// hide arm
+			rightArm.gameObject.SetActive (false);
 
 			// point camera down.
 			transform.rotation = Quaternion.Euler (90f, 0f, 0f);
@@ -287,7 +293,7 @@ public class PlayerSpaceController : MonoBehaviour {
 			float degreesToLook = 3f; // how far to look up/down left/right
 			cameraToUse.localRotation = Quaternion.Euler(new Vector3(lookV * degreesToLook, lookH * degreesToLook, 0));
 		}
-		Debug.Log("lookH:" + lookH + " lookV:" + lookV + " centerEyeRot:" + cameraToUse.localRotation);
+//		Debug.Log("lookH:" + lookH + " lookV:" + lookV + " centerEyeRot:" + cameraToUse.localRotation);
 
 		// ROTATE  where we are looking. If there is no controller input
 		if ((h == 0) && (v == 0)) {
@@ -387,11 +393,11 @@ public class PlayerSpaceController : MonoBehaviour {
 
 
 		// Auto grab objects when they collide with the astronaut 
-		if (useWithNoController == true) {
+		if ((useWithNoController == true) && (objectWeAreGrabbingRightNow == null)) {
 			GameObject debrisToGrab = null;
 			foreach (GameObject debris in debrisWithinReach) {
 				float dist = Vector3.Distance(transform.position, debris.transform.position);
-				if (dist < 1.5f) {
+				if (dist < 2.5f) {
 					// object is close enough to grab it. Grab it!
 //					Debug.Log("AUTO GRABBING OBJECT!!:" + debris);
 					debrisToGrab = debris;
@@ -478,13 +484,31 @@ public class PlayerSpaceController : MonoBehaviour {
 		audio.PlayOneShot (debris.GetComponent<DebrisAudio> ().audioClip);
 
 		debrisWithinReach.Remove(debris);
-		
-		// tell the debris manager to remove the object
-		debrisManager.RemoveDebris(debris.transform);
-		
-//				Debug.Log("right trigger released, grabbed:" + closestObjectWithinReach);
-		// TODO: show inventory icon
-		hudVisor.PickedUpObject (debris);
+
+		objectWeAreGrabbingRightNow = debris;
+
+		// don't destroy the debris immediately, instead animate it moving to right in front where the arm can grab it
+		StartCoroutine ("AnimateRightArmGrabbing");
+	}
+
+	IEnumerator AnimateRightArmGrabbing() {
+		if (objectWeAreGrabbingRightNow != null) {
+			// start grabbing animation
+			rightArm.GetComponentInChildren<Animator>().SetBool("RightArmGrab", true);
+			// move the object right in front where the arm can grab it
+			for (float f = 0; f < 30f; f++) {
+				objectWeAreGrabbingRightNow.transform.position = Vector3.Lerp(objectWeAreGrabbingRightNow.transform.position, transform.position + (transform.forward * 1), f/30f);
+				yield return 0;
+			}
+
+			// tell the debris manager to remove the object
+			debrisManager.RemoveDebris(objectWeAreGrabbingRightNow.transform);
+			
+			// show inventory icon
+			hudVisor.PickedUpObject (objectWeAreGrabbingRightNow);
+		}
+		objectWeAreGrabbingRightNow = null;
+		yield return 0;
 	}
 
 	void OnTriggerEnter(Collider other) {
