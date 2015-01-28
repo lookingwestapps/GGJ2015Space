@@ -33,7 +33,7 @@ This game was created by independent programmers, artists, and musicians in Denv
 - Director - **Linh Ngo** 
 - Lead Sound Engineer - **Mike Bryant**
 - Designer - **Ben Sloboda**
-- Music - **[Tim Girard](http://http://thetimgirard.com)**
+- Music - **[Tim Girard](http://thetimgirard.com)**
 - Sound Engineers - **Andrew Hannum** and **Ryan Davis**
 
 We would like to thank the **University of Denver** for hosting our fantastic jam site.
